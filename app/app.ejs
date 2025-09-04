@@ -16,6 +16,66 @@
             -ms-user-select: none;
             user-select: none;
         }
+
+        /* Carousel transition styles */
+        body.carousel-fade {
+            transition: background-image var(--carousel-transition-time, 1000ms) ease-in-out;
+        }
+        
+        body.carousel-slide-left {
+            transition: background-position var(--carousel-transition-time, 1000ms) ease-in-out;
+            background-position: 0% 50%;
+        }
+        
+        body.carousel-slide-left.transitioning {
+            background-position: -100% 50%;
+        }
+        
+        body.carousel-slide-right {
+            transition: background-position var(--carousel-transition-time, 1000ms) ease-in-out;
+            background-position: 0% 50%;
+        }
+        
+        body.carousel-slide-right.transitioning {
+            background-position: 100% 50%;
+        }
+        
+        body.carousel-slide-up {
+            transition: background-position var(--carousel-transition-time, 1000ms) ease-in-out;
+            background-position: 50% 0%;
+        }
+        
+        body.carousel-slide-up.transitioning {
+            background-position: 50% -100%;
+        }
+        
+        body.carousel-slide-down {
+            transition: background-position var(--carousel-transition-time, 1000ms) ease-in-out;
+            background-position: 50% 0%;
+        }
+        
+        body.carousel-slide-down.transitioning {
+            background-position: 50% 100%;
+        }
+        
+        body.carousel-zoom-in {
+            transition: background-size var(--carousel-transition-time, 1000ms) ease-in-out;
+            background-size: cover;
+        }
+        
+        body.carousel-zoom-in.transitioning {
+            background-size: 150% 150%;
+        }
+        
+        body.carousel-zoom-out {
+            transition: background-size var(--carousel-transition-time, 1000ms) ease-in-out;
+            background-size: cover;
+        }
+        
+        body.carousel-zoom-out.transitioning {
+            background-size: 50% 50%;
+        }
+
         /* Allow jpg, png, or gif backgrounds */
         body[data-bkg$=".jpg"], 
         body[data-bkg$=".jpeg"], 

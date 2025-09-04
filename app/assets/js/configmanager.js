@@ -87,6 +87,12 @@ const DEFAULT_CONFIG = {
         launcher: {
             allowPrerelease: false,
             dataDirectory: dataPath
+        },
+        carousel: {
+            enabled: true,
+            durationPerImage: 8000, // 10 seconds per image in milliseconds
+            transitionTime: 1000, // 3 seconds transition in milliseconds
+            transitionType: 'fade' // Available types: fade, slide-left, slide-right, slide-up, slide-down, zoom-in, zoom-out
         }
     },
     newsCache: {
@@ -790,4 +796,112 @@ exports.getAllowPrerelease = function (def = false) {
  */
 exports.setAllowPrerelease = function (allowPrerelease) {
     config.settings.launcher.allowPrerelease = allowPrerelease
+}
+
+
+// Carousel Configuration Functions
+
+/**
+ * Retrieve the carousel configuration.
+ * 
+ * @param {boolean} def Optional. If true, will return the default configuration rather 
+ * than the current configuration.
+ * 
+ * @returns {Object} The carousel configuration object.
+ */
+exports.getCarouselConfig = function (def = false) {
+    return !def ? config.settings.carousel : DEFAULT_CONFIG.settings.carousel
+}
+
+/**
+ * Set the carousel configuration.
+ * 
+ * @param {Object} carouselConfig The new carousel configuration object.
+ */
+exports.setCarouselConfig = function (carouselConfig) {
+    config.settings.carousel = carouselConfig
+}
+
+/**
+ * Retrieve the carousel enabled status.
+ * 
+ * @param {boolean} def Optional. If true, will return the default value rather 
+ * than the current configuration.
+ * 
+ * @returns {boolean} Whether the carousel is enabled.
+ */
+exports.getCarouselEnabled = function (def = false) {
+    return !def ? config.settings.carousel.enabled : DEFAULT_CONFIG.settings.carousel.enabled
+}
+
+/**
+ * Set the carousel enabled status.
+ * 
+ * @param {boolean} enabled Whether the carousel should be enabled.
+ */
+exports.setCarouselEnabled = function (enabled) {
+    config.settings.carousel.enabled = enabled
+}
+
+/**
+ * Retrieve the carousel duration per image.
+ * 
+ * @param {boolean} def Optional. If true, will return the default value rather 
+ * than the current configuration.
+ * 
+ * @returns {number} Duration per image in milliseconds.
+ */
+exports.getCarouselDurationPerImage = function (def = false) {
+    return !def ? config.settings.carousel.durationPerImage : DEFAULT_CONFIG.settings.carousel.durationPerImage
+}
+
+/**
+ * Set the carousel duration per image.
+ * 
+ * @param {number} duration Duration per image in milliseconds.
+ */
+exports.setCarouselDurationPerImage = function (duration) {
+    config.settings.carousel.durationPerImage = duration
+}
+
+/**
+ * Retrieve the carousel transition time.
+ * 
+ * @param {boolean} def Optional. If true, will return the default value rather 
+ * than the current configuration.
+ * 
+ * @returns {number} Transition time in milliseconds.
+ */
+exports.getCarouselTransitionTime = function (def = false) {
+    return !def ? config.settings.carousel.transitionTime : DEFAULT_CONFIG.settings.carousel.transitionTime
+}
+
+/**
+ * Set the carousel transition time.
+ * 
+ * @param {number} transitionTime Transition time in milliseconds.
+ */
+exports.setCarouselTransitionTime = function (transitionTime) {
+    config.settings.carousel.transitionTime = transitionTime
+}
+
+/**
+ * Retrieve the carousel transition type.
+ * 
+ * @param {boolean} def Optional. If true, will return the default value rather 
+ * than the current configuration.
+ * 
+ * @returns {string} The transition type.
+ */
+exports.getCarouselTransitionType = function (def = false) {
+    return !def ? config.settings.carousel.transitionType : DEFAULT_CONFIG.settings.carousel.transitionType
+}
+
+/**
+ * Set the carousel transition type.
+ * 
+ * @param {string} transitionType The transition type (fade, slide-left, slide-right, slide-up, slide-down, zoom-in, zoom-out).
+ */
+exports.setCarouselTransitionType = function (transitionType) {
+    config.settings.carousel.transitionType = transitionType
 }

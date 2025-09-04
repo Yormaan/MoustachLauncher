@@ -70,18 +70,8 @@ async function showMainUI(data) {
     refreshServerStatus()
     setTimeout(() => {
         document.getElementById('frameBar').style.backgroundColor = 'rgba(0, 0, 0, 0.5)'
-
-        const base = document.body.getAttribute('bkid') || 'default'
-        const exts = ['jpg', 'png', 'gif', 'webp']
-        const dir = path.resolve(__dirname, 'assets', 'images', 'backgrounds')
-
-        const found = exts.find(ext => fs.existsSync(path.join(dir, `${base}.${ext}`)))
-
-        const url = found
-            ? `assets/images/backgrounds/${base}.${found}`
-            : 'assets/images/backgrounds/default.jpg'
-
-        document.body.style.backgroundImage = `url('${url}')`
+        // Initialize background carousel
+        initBackgroundCarousel()
         $('#main').show()
 
         const isLoggedIn = Object.keys(ConfigManager.getAuthAccounts()).length > 0
@@ -475,4 +465,181 @@ async function devModeToggle() {
     ensureJavaSettings(data)
     updateSelectedServer(data.servers[0])
     syncModConfigurations(data)
+}
+
+
+// Background Carousel Functions
+let carouselState = {
+    enabled: false,
+    images: [],
+    currentIndex: 0,
+    intervalId: null,
+    isTransitioning: false
+}
+
+/**
+ * Initialize the background carousel system
+ */
+function initBackgroundCarousel() {
+    const carouselConfig = ConfigManager.getCarouselConfig()
+    carouselState.enabled = carouselConfig.enabled
+
+    if (!carouselState.enabled) {
+        // Use original single background logic if carousel is disabled
+        setDefaultBackground()
+        return
+    }
+
+    // Find all available background images
+    const exts = ['jpg', 'jpeg', 'png', 'gif', 'webp']
+    const dir = path.resolve(__dirname, 'assets', 'images', 'backgrounds')
+
+    carouselState.images = []
+
+    // Look for numbered backgrounds (0.png, 1.gif, etc.) and default
+    for (let i = 0; i < 10; i++) {
+        const found = exts.find(ext => fs.existsSync(path.join(dir, `${i}.${ext}`)))
+        if (found) {
+            carouselState.images.push(`assets/images/backgrounds/${i}.${found}`)
+        }
+    }
+
+    // Also check for default background
+    const defaultFound = exts.find(ext => fs.existsSync(path.join(dir, `default.${ext}`)))
+    if (defaultFound) {
+        carouselState.images.push(`assets/images/backgrounds/default.${defaultFound}`)
+    }
+
+    // Fall back to original logic if no images found
+    if (carouselState.images.length === 0) {
+        setDefaultBackground()
+        return
+    }
+
+    // If only one image, disable carousel and use that image
+    if (carouselState.images.length === 1) {
+        document.body.style.backgroundImage = `url('${carouselState.images[0]}')`
+        return
+    }
+
+    // Set up carousel
+    setupCarousel()
+}
+
+/**
+ * Set default background using original logic
+ */
+function setDefaultBackground() {
+    const base = document.body.getAttribute('bkid') || 'default'
+    const exts = ['jpg', 'png', 'gif', 'webp']
+    const dir = path.resolve(__dirname, 'assets', 'images', 'backgrounds')
+
+    const found = exts.find(ext => fs.existsSync(path.join(dir, `${base}.${ext}`)))
+
+    const url = found
+        ? `assets/images/backgrounds/${base}.${found}`
+        : 'assets/images/backgrounds/default.jpg'
+
+    document.body.style.backgroundImage = `url('${url}')`
+}
+
+/**
+ * Setup the carousel with proper styling and timing
+ */
+function setupCarousel() {
+    const carouselConfig = ConfigManager.getCarouselConfig()
+    const transitionType = carouselConfig.transitionType
+    const transitionTime = carouselConfig.transitionTime
+    const durationPerImage = carouselConfig.durationPerImage
+
+    // Set CSS custom property for transition time
+    document.documentElement.style.setProperty('--carousel-transition-time', `${transitionTime}ms`)
+
+    // Add transition class to body
+    document.body.className = document.body.className.replace(/carousel-\w+/g, '')
+    document.body.classList.add(`carousel-${transitionType}`)
+
+    // Set initial background
+    carouselState.currentIndex = 0
+    document.body.style.backgroundImage = `url('${carouselState.images[carouselState.currentIndex]}')`
+
+    // Start the carousel
+    startCarousel(durationPerImage, transitionTime)
+}
+
+/**
+ * Start the carousel rotation
+ */
+function startCarousel(durationPerImage, transitionTime) {
+    // Clear any existing interval
+    if (carouselState.intervalId) {
+        clearInterval(carouselState.intervalId)
+    }
+
+    carouselState.intervalId = setInterval(() => {
+        if (!carouselState.isTransitioning) {
+            nextBackgroundImage(transitionTime)
+        }
+    }, durationPerImage)
+}
+
+/**
+ * Transition to the next background image
+ */
+function nextBackgroundImage(transitionTime) {
+    if (carouselState.isTransitioning || carouselState.images.length <= 1) {
+        return
+    }
+
+    carouselState.isTransitioning = true
+
+    // Move to next image
+    carouselState.currentIndex = (carouselState.currentIndex + 1) % carouselState.images.length
+    const nextImage = carouselState.images[carouselState.currentIndex]
+
+    const transitionType = ConfigManager.getCarouselTransitionType()
+
+    if (transitionType === 'fade') {
+        // Simple fade transition
+        document.body.style.backgroundImage = `url('${nextImage}')`
+    } else {
+        // For other transitions, add transitioning class, change image, then remove class
+        document.body.classList.add('transitioning')
+
+        setTimeout(() => {
+            document.body.style.backgroundImage = `url('${nextImage}')`
+
+            setTimeout(() => {
+                document.body.classList.remove('transitioning')
+                carouselState.isTransitioning = false
+            }, transitionTime)
+        }, 50) // Small delay to ensure class is applied
+
+        return // Don't set isTransitioning to false immediately for non-fade transitions
+    }
+
+    // For fade transition, mark as complete after transition time
+    setTimeout(() => {
+        carouselState.isTransitioning = false
+    }, transitionTime)
+}
+
+/**
+ * Stop the carousel
+ */
+function stopCarousel() {
+    if (carouselState.intervalId) {
+        clearInterval(carouselState.intervalId)
+        carouselState.intervalId = null
+    }
+}
+
+/**
+ * Restart the carousel with current settings
+ */
+function restartCarousel() {
+    if (carouselState.enabled && carouselState.images.length > 1) {
+        const carouselConfig = ConfigManager.getCarouselConfig()
+        setupCarousel()
+    }
 }
